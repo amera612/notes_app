@@ -12,7 +12,7 @@ class NotesView extends StatelessWidget {
       child: Scaffold(
           floatingActionButton: FloatingActionButton(
             backgroundColor: kPrimaryColor,
-            shape: CircleBorder(),
+            shape: const CircleBorder(),
             onPressed: () {
               showModalBottomSheet(
                 shape: RoundedRectangleBorder(
