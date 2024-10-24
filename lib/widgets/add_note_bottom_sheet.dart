@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:note_app/cubits/cubit/add_note_cubit.dart';
+import 'package:note_app/cubits/cubit/read_notes_cubit.dart';
 import 'package:note_app/widgets/add_note_form.dart';
 
 class AddNoteBottomSheet extends StatelessWidget {
@@ -11,23 +11,34 @@ class AddNoteBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 16),
-      child: SingleChildScrollView(
-        child: BlocConsumer<AddNoteCubit, AddNoteState>(
-          listener: (context, state) {
-            if (state is AddNoteFailure) {
-              log('failed ${state.errMessage}');
-            } else if (state is AddNoteSuccess) {
-              Navigator.pop(context);
-            }
-          },
-          builder: (context, state) {
-            return ModalProgressHUD(
-                inAsyncCall: state is AddNoteLoaded ? true : false,
-                child: const AddNoteForm());
-          },
-        ),
+    return BlocProvider(
+      create: (context) => AddNoteCubit(),
+      child: BlocConsumer<AddNoteCubit, AddNoteState>(
+        listener: (context, state) {
+          if (state is AddNoteFailure) {
+            log('failed ${state.errMessage}');
+          } else if (state is AddNoteSuccess) {
+            BlocProvider.of<ReadNotesCubit>(context).featchAllNotes();
+            Navigator.pop(context);
+          }
+        },
+        builder: (context, state) {
+          //AbsorbPointer it use to make user can't change
+          return AbsorbPointer(
+            absorbing: State is AddNoteLoaded ? true : false,
+            child: Padding(
+              padding: EdgeInsets.only(
+                  top: 30,
+                  left: 18,
+                  right: 18,
+                  //🦋🦋🦋🦋to make the space from under ex. keyboard
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: const SingleChildScrollView(
+                child: AddNoteForm(),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
